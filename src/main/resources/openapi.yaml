@@ -1,0 +1,140 @@
+openapi: '3.0.1'
+
+
+info:
+  title: Device Details API
+  description: API for managing devices details
+  version: 1.0.0
+
+
+servers:
+  - url: http://localhost:8081/api
+    description: Local Server
+
+
+paths:
+  /device:
+    get:
+      summary: get all devices details
+      operationId: getAllDeviceDetails
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceDetails'
+
+    post:
+      summary: Create a new device
+      operationId: createDevice
+      parameters:
+        - name: color
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: price
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetails'
+
+  /device/{id}:
+    get:
+      summary: get device details by ID
+      operationId: getDeviceDetailsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetails'
+
+    put:
+      summary: Update device details by ID
+      operationId: updateDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDetails'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetails'
+
+    delete:
+      summary: Delete device details by ID
+      operationId: deleteDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+
+components:
+  schemas:
+    DeviceDetails:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        color:
+          type: string
+        price:
+          type: integer
+        capacity:
+          type: string
+    DeviceDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        capacity:
+          type: string
+
+
