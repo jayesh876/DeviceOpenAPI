@@ -55,13 +55,15 @@ public class DeviceService implements DeviceApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDevice(Integer id) {
+    public ResponseEntity<String> deleteDevice(Integer id) {
         String idUrl = url + "/{id}";
-        builder.build()
+        String response = builder.build()
                 .delete()
                 .uri(idUrl, id)
-                .retrieve();
-        return new ResponseEntity<>(HttpStatus.OK);
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
