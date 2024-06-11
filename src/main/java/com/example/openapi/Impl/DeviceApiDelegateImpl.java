@@ -7,24 +7,23 @@ import com.example.openapi.mapper.DeviceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
-public class DeviceService implements DeviceApiDelegate {
+public class DeviceApiDelegateImpl implements DeviceApiDelegate {
 
     private static final String url = "http://localhost:9090/device";
+    private static final String idUrl = url + "/{id}";
     @Autowired
     private WebClient.Builder builder;
     @Autowired
     private DeviceMapper mapper;
 
-    public DeviceService(WebClient.Builder builder) {
+    public DeviceApiDelegateImpl(WebClient.Builder builder) {
         this.builder = builder;
     }
     @Override
@@ -56,7 +55,6 @@ public class DeviceService implements DeviceApiDelegate {
 
     @Override
     public ResponseEntity<String> deleteDevice(Integer id) {
-        String idUrl = url + "/{id}";
         String response = builder.build()
                 .delete()
                 .uri(idUrl, id)
@@ -80,7 +78,6 @@ public class DeviceService implements DeviceApiDelegate {
 
     @Override
     public ResponseEntity<DeviceDetails> getDeviceDetailsById(Integer id) {
-        String idUrl = url + "/{id}";
         DeviceDetails details = builder.build()
                 .get()
                 .uri(idUrl, id)
@@ -92,7 +89,6 @@ public class DeviceService implements DeviceApiDelegate {
 
     @Override
     public ResponseEntity<DeviceDetails> updateDevice(Integer id, DeviceDetails deviceDetails) {
-        String idUrl = url + "/{id}";
         DeviceDetails details =  builder.build()
                 .put()
                 .uri(idUrl, id)
