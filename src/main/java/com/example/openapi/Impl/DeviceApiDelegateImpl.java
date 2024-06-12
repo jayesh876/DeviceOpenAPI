@@ -3,12 +3,15 @@ package com.example.openapi.Impl;
 import com.example.openapi.api.DeviceApiDelegate;
 import com.example.openapi.dto.DeviceDetails;
 import com.example.openapi.dto.DeviceDto;
+import com.example.openapi.exception.DeviceNotFoundException;
 import com.example.openapi.mapper.DeviceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -55,13 +58,20 @@ public class DeviceApiDelegateImpl implements DeviceApiDelegate {
 
     @Override
     public ResponseEntity<String> deleteDevice(Integer id) {
-        String response = builder.build()
-                .delete()
-                .uri(idUrl, id)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            String response = builder.build()
+                    .delete()
+                    .uri(idUrl, id)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> {
+                        return Mono.error(new DeviceNotFoundException("Device with Id not found"));
+                    })
+                    .bodyToMono(String.class)
+                    .block();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch(DeviceNotFoundException exception){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
@@ -78,26 +88,41 @@ public class DeviceApiDelegateImpl implements DeviceApiDelegate {
 
     @Override
     public ResponseEntity<DeviceDetails> getDeviceDetailsById(Integer id) {
-        DeviceDetails details = builder.build()
-                .get()
-                .uri(idUrl, id)
-                .retrieve()
-                .bodyToMono(DeviceDetails.class)
-                .block();
-        return new ResponseEntity<>(details, HttpStatus.OK);
+        try {
+            DeviceDetails details = builder.build()
+                    .get()
+                    .uri(idUrl, id)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> {
+                        return Mono.error(new DeviceNotFoundException("Device with Id not found"));
+                    })
+                    .bodyToMono(DeviceDetails.class)
+                    .block();
+            return new ResponseEntity<>(details, HttpStatus.OK);
+        }catch (DeviceNotFoundException exception){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
     public ResponseEntity<DeviceDetails> updateDevice(Integer id, DeviceDetails deviceDetails) {
-        DeviceDetails details =  builder.build()
-                .put()
-                .uri(idUrl, id)
-                .body(Mono.just(deviceDetails), DeviceDetails.class)
-                .retrieve()
-                .bodyToMono(DeviceDetails.class)
-                .block();
+        try {
+             DeviceDetails details = builder.build()
+                    .put()
+                    .uri(idUrl, id)
+                    .body(Mono.just(deviceDetails), DeviceDetails.class)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> {
+                        return Mono.error(new DeviceNotFoundException("Device with Id not found"));
+                    })
+                    .bodyToMono(DeviceDetails.class)
+                    .block();
+            return new ResponseEntity<>(details, HttpStatus.CREATED);
+        }catch(DeviceNotFoundException exception){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
 
-        return new ResponseEntity<>(details, HttpStatus.CREATED);
+
     }
 
 }
